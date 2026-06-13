@@ -51,10 +51,6 @@ type ConfigPluginProps = {
    * iOS额外推送配置文件路径列表。会放在ios/
    */
   extraIOSThirdPartyPushConfigFiles?: string[];
-  /**
-   * iOS推送环境，默认是"development"。
-   */
-  apsEnvironment?: string;
 };
 
 export default ConfigPluginProps;

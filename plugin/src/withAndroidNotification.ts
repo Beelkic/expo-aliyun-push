@@ -241,6 +241,61 @@ const withCopyAndroidSoundFile: ConfigPlugin<ConfigPluginProps> = (
   return config;
 };
 
+const ALLOWED_ANDROID_TARGET_DIRS = new Set(["/", "/app", "/app/"]);
+
+const withCopyAndroidThirdPartyPushConfigFiles: ConfigPlugin<ConfigPluginProps> = (
+  config,
+  props,
+) => {
+  config = withDangerousMod(config, [
+    "android",
+    async (config) => {
+      const files = props.extraAndroidThirdPartyPushConfigFiles;
+      if (!files || Object.keys(files).length === 0) {
+        return config;
+      }
+
+      const fs = require("fs");
+      const path = require("path");
+      const projectRoot = config.modRequest.projectRoot;
+
+      for (const [sourceRelativePath, targetDirRelative] of Object.entries(files)) {
+        if (!ALLOWED_ANDROID_TARGET_DIRS.has(targetDirRelative)) {
+          console.warn(
+            `Warning: Invalid target directory "${targetDirRelative}" for ${sourceRelativePath}. Only "/" and "/app/" are allowed.`,
+          );
+          continue;
+        }
+
+        const sourceFullPath = path.join(projectRoot, sourceRelativePath);
+        const fileName = path.basename(sourceRelativePath);
+        const targetBaseDir =
+          targetDirRelative === "/"
+            ? path.join(projectRoot, "android")
+            : path.join(projectRoot, "android/app");
+        const targetPath = path.join(targetBaseDir, fileName);
+
+        if (!fs.existsSync(targetBaseDir)) {
+          fs.mkdirSync(targetBaseDir, { recursive: true });
+        }
+
+        if (fs.existsSync(sourceFullPath)) {
+          await fs.promises.copyFile(sourceFullPath, targetPath);
+          console.log(
+            `Copied config file from ${sourceFullPath} to ${targetPath}`,
+          );
+        } else {
+          console.warn(`Warning: Config file not found at ${sourceFullPath}`);
+        }
+      }
+
+      return config;
+    },
+  ]);
+
+  return config;
+};
+
 export const withAndroidNotification: ConfigPlugin<ConfigPluginProps> = (
   config,
   props,
@@ -249,6 +304,8 @@ export const withAndroidNotification: ConfigPlugin<ConfigPluginProps> = (
   config = withChangeAndroidManifest(config, props);
   // 复制铃声文件
   config = withCopyAndroidSoundFile(config, props);
+  // 复制第三方推送配置文件
+  config = withCopyAndroidThirdPartyPushConfigFiles(config, props);
 
   return config;
 };

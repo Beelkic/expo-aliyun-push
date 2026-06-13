@@ -1,9 +1,11 @@
 import { ConfigPlugin, withInfoPlist, withPodfile } from "expo/config-plugins";
 import ConfigPluginProps from "./ConfigPluginProps";
+import { withAndroidNotification } from "./withAndroidNotification";
 import { withIOSNotification } from "./withIOSNotification";
 
 /// 安卓推送插件以及其依赖版本关系：https://help.aliyun.com/document_detail/434659.html?spm=a2c4g.11186623.0.0.64182bef1tJ1wl#topic-1996989
 const withAliyunPush: ConfigPlugin<ConfigPluginProps> = (config, props) => {
+  config = withAndroidNotification(config, props);
   config = withIOSNotification(config, props);
 
   // 按需配置安卓三方推送依赖

@@ -1,6 +1,5 @@
 import {
   ConfigPlugin,
-  withEntitlementsPlist,
   withXcodeProject,
   IOSConfig,
   XcodeProject,
@@ -8,16 +7,6 @@ import {
 import { copyFileSync, existsSync } from "fs";
 import { basename, join, resolve } from "path";
 import ConfigPluginProps from "./ConfigPluginProps";
-
-const withApsEnvironment: ConfigPlugin<{ mode: string }> = (config, { mode }) => {
-  config = withEntitlementsPlist(config, (config) => {
-    if (!config.modResults["aps-environment"]) {
-      config.modResults["aps-environment"] = mode;
-    }
-    return config;
-  });
-  return config;
-};
 
 /**
  * 将资源文件复制到 iOS 工程目录，并在 Xcode 项目中注册（使用相对路径）。
@@ -93,10 +82,6 @@ export const withIOSNotification: ConfigPlugin<ConfigPluginProps> = (
   config,
   props,
 ) => {
-  config = withApsEnvironment(config, {
-    mode: props.apsEnvironment || "development",
-  });
-
   const resourceSourcePaths = [
     ...(props.notificationSoundSourcePaths ?? []),
     ...(props.extraIOSThirdPartyPushConfigFiles ?? []),
