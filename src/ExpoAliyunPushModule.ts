@@ -6,7 +6,6 @@ import {
   AndroidNotificationChannel,
   ExpoAliyunPushModuleEvents,
   IOSNotificationForegroundOptions,
-  XiaomiInternationalPushRegion,
 } from "./ExpoAliyunPush.types";
 
 declare class ExpoAliyunPushModule extends NativeModule<ExpoAliyunPushModuleEvents> {

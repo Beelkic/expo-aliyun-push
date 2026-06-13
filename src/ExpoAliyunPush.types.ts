@@ -1,4 +1,3 @@
-import type { StyleProp, ViewStyle } from 'react-native';
 
 
 export type ExpoAliyunPushModuleEvents = {
@@ -65,6 +64,10 @@ export type AndroidNotificationChannel = {
   showBadges?: boolean;
   enableVibration?: boolean;
   vibrationPattern?: number[];
+  /**
+   * 通道铃声。支持 res/raw 资源名或文件名（如 `ringtong` 或 `ringtong.wav`，需通过 config plugin 的
+   * `notificationSoundSourcePaths` 预先复制到 `android/app/src/main/res/raw/`），也支持本地文件绝对路径。
+   */
   soundPath?: string;
   soundUsage?: number;
   soundContentType?: number;

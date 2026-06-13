@@ -11,6 +11,7 @@ import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import androidx.core.content.PermissionChecker
 import anet.channel.util.Utils.context
 import com.alibaba.sdk.android.push.CloudPushService
@@ -26,7 +27,6 @@ import com.alibaba.sdk.android.push.register.VivoRegister
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.io.File
 import java.net.URL
 
 
@@ -40,22 +40,10 @@ class ExpoAliyunPushModule : Module() {
         }
     }
 
-    // Each module class must implement the definition function. The definition consists of components
-    // that describes the module's functionality and behavior.
-    // See https://docs.expo.dev/modules/module-api for more details about available components.
     @SuppressLint("WrongConstant")
     override fun definition() = ModuleDefinition {
-        // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-        // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-        // The module will be accessible from `requireNativeModule('ExpoAliyunPush')` in JavaScript.
         Name("ExpoAliyunPush")
 
-        // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-        Constants(
-            "PI" to Math.PI
-        )
-
-        // Defines event names that the module can send to JavaScript.
         Events(
             "onNotification",
             "onNotificationReceivedInApp",
@@ -410,19 +398,29 @@ class ExpoAliyunPushModule : Module() {
                     channel.vibrationPattern = channelInfo.vibrationPattern.toLongArray()
                 }
                 if (!channelInfo.soundPath.isNullOrBlank()) {
-                    val soundFile = File(channelInfo.soundPath)
-                    if (soundFile.exists() && soundFile.isFile && soundFile.canRead()) {
+                    val soundUri = NotificationChannelSoundHelper.resolveSoundUri(
+                        application,
+                        channelInfo.soundPath,
+                    )
+                    if (soundUri != null) {
                         val soundBuilder = AudioAttributes.Builder()
-                        if (channelInfo.soundUsage != null) {
-                            soundBuilder.setUsage(channelInfo.soundUsage)
-                        }
-                        if (channelInfo.soundContentType != null) {
-                            soundBuilder.setContentType(channelInfo.soundContentType)
-                        }
+                            .setContentType(
+                                channelInfo.soundContentType
+                                    ?: AudioAttributes.CONTENT_TYPE_SONIFICATION,
+                            )
+                            .setUsage(
+                                channelInfo.soundUsage
+                                    ?: AudioAttributes.USAGE_NOTIFICATION,
+                            )
                         if (channelInfo.soundFlag != null) {
                             soundBuilder.setFlags(channelInfo.soundFlag)
                         }
-                        channel.setSound(Uri.fromFile(soundFile), soundBuilder.build())
+                        channel.setSound(soundUri, soundBuilder.build())
+                    } else {
+                        Log.w(
+                            "ExpoAliyunPush",
+                            "Could not resolve notification sound: ${channelInfo.soundPath}",
+                        )
                     }
                 }
                 notificationManager.createNotificationChannel(channel)
@@ -478,17 +476,6 @@ class ExpoAliyunPushModule : Module() {
                 intent.putExtra("app_uid", context.applicationInfo.uid)
             }
             context.startActivity(intent)
-        }
-
-        // Enables the module to be used as a native view. Definition components that are accepted as part of
-        // the view definition: Prop, Events.
-        View(ExpoAliyunPushView::class) {
-            // Defines a setter for the `url` prop.
-            Prop("url") { view: ExpoAliyunPushView, url: URL ->
-                view.webView.loadUrl(url.toString())
-            }
-            // Defines an event that the view can send to JavaScript.
-            Events("onLoad")
         }
     }
 }
