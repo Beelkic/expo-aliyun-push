@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 group = 'expo.modules.aliyunpush'
-version = '0.3.0'
+version = '0.4.0'
 
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
 apply from: expoModulesCorePlugin
@@ -35,7 +35,7 @@ android {
     namespace "expo.modules.aliyunpush"
     defaultConfig {
         versionCode 1
-        versionName "0.3.0"
+        versionName "0.4.0"
     }
     lintOptions {
         abortOnError false
@@ -44,14 +44,13 @@ android {
 
 
 dependencies {
-    implementation 'com.aliyun.ams:alicloud-android-push:3.9.3'
-    implementation 'com.aliyun.ams:alicloud-android-third-push:3.9.2'
-    implementation 'com.aliyun.ams:alicloud-android-third-push-oppo:3.9.2'
-    implementation 'com.aliyun.ams:alicloud-android-third-push-vivo:3.9.2'
-    implementation 'com.aliyun.ams:alicloud-android-third-push-honor:3.9.2'
-    implementation 'com.huawei.hms:push:6.12.0.300'
-    implementation 'com.aliyun.ams:alicloud-android-third-push-huawei:3.9.2'
-    implementation 'com.aliyun.ams:alicloud-android-third-push-fcm:3.9.2'
-    implementation 'com.aliyun.ams:alicloud-android-third-push-meizu:3.9.2'
-    implementation 'com.aliyun.ams:alicloud-android-third-push-xiaomi:3.9.2'
+    implementation 'com.aliyun.ams:alicloud-android-push:3.10.1'
+    implementation 'com.aliyun.ams:alicloud-android-third-push:3.10.1'
+    implementation 'com.aliyun.ams:alicloud-android-third-push-oppo:3.10.1'
+    implementation 'com.aliyun.ams:alicloud-android-third-push-vivo:3.10.1'
+    implementation 'com.aliyun.ams:alicloud-android-third-push-honor:3.10.1'
+    implementation 'com.aliyun.ams:alicloud-android-third-push-huawei:3.10.1'
+    implementation 'com.aliyun.ams:alicloud-android-third-push-fcm:3.10.1'
+    implementation 'com.aliyun.ams:alicloud-android-third-push-meizu:3.10.1'
+    implementation 'com.aliyun.ams:alicloud-android-third-push-xiaomi:3.10.1'
 }
