@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioAttributes
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
@@ -27,13 +26,11 @@ import com.alibaba.sdk.android.push.register.VivoRegister
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
-
 
 class ExpoAliyunPushModule : Module() {
     companion object {
         private var moduleInstance: ExpoAliyunPushModule? = null
-//        var showNotificationNow = true
+        //        var showNotificationNow = true
 
         fun sendEventToJS(eventName: String, params: Map<String, Any?>) {
             moduleInstance?.sendEvent(eventName, params)
@@ -45,12 +42,12 @@ class ExpoAliyunPushModule : Module() {
         Name("ExpoAliyunPush")
 
         Events(
-            "onNotification",
-            "onNotificationReceivedInApp",
-            "onNotificationOpened",
-            "onMessage",
-            "onNotificationClickedWithNoAction",
-            "onNotificationRemoved"
+                "onNotification",
+                "onNotificationReceivedInApp",
+                "onNotificationOpened",
+                "onMessage",
+                "onNotificationClickedWithNoAction",
+                "onNotificationRemoved"
         )
 
         OnCreate {
@@ -64,24 +61,26 @@ class ExpoAliyunPushModule : Module() {
             val pushService = PushServiceFactory.getCloudPushService()
 
             pushService.register(
-                appContext.reactContext?.applicationContext,
-                object : CommonCallback {
-                    override fun onSuccess(success: String) {
-                        promise.resolve(success)
-                    }
+                    appContext.reactContext?.applicationContext,
+                    object : CommonCallback {
+                        override fun onSuccess(success: String) {
+                            promise.resolve(success)
+                        }
 
-                    override fun onFailed(errorCode: String, errorMessage: String) {
-                        promise.reject(errorCode, errorMessage, null)
+                        override fun onFailed(errorCode: String, errorMessage: String) {
+                            promise.reject(errorCode, errorMessage, null)
+                        }
                     }
-                })
+            )
         }
 
         AsyncFunction("initThirdPush") { promise: Promise ->
             val application = appContext.reactContext?.applicationContext as android.app.Application
-            val applicationInfo = appContext.reactContext?.packageManager?.getApplicationInfo(
-                appContext.reactContext?.packageName.toString(),
-                PackageManager.GET_META_DATA
-            )
+            val applicationInfo =
+                    appContext.reactContext?.packageManager?.getApplicationInfo(
+                            appContext.reactContext?.packageName.toString(),
+                            PackageManager.GET_META_DATA
+                    )
             val xiaoMiAppId = applicationInfo?.metaData?.getString("XIAOMI_PUSH_APP_ID")
             val xiaoMiAppKey = applicationInfo?.metaData?.getString("XIAOMI_PUSH_APP_KEY")
             if (xiaoMiAppId != null && xiaoMiAppKey != null) {
@@ -104,10 +103,10 @@ class ExpoAliyunPushModule : Module() {
             val fcmProjectId = applicationInfo?.metaData?.getString("FIREBASE_PUSH_PROJECT_ID")
             val fcmApiKey = applicationInfo?.metaData?.getString("FIREBASE_PUSH_API_KEY")
             val fcmSendId = applicationInfo?.metaData?.getString("FIREBASE_PUSH_SEND_ID")
-            if (fcmSendId != null && fcmProjectId != null && fcmApiKey != null && fcmAppId != null) {
+            if (fcmSendId != null && fcmProjectId != null && fcmApiKey != null && fcmAppId != null
+            ) {
                 GcmRegister.register(application, fcmSendId, fcmAppId, fcmProjectId, fcmApiKey)
             }
-
 
             HuaWeiRegister.register(application)
             HonorRegister.register(application)
@@ -121,15 +120,12 @@ class ExpoAliyunPushModule : Module() {
                 "off" -> {
                     pushService.setLogLevel(CloudPushService.LOG_OFF)
                 }
-
                 "error" -> {
                     pushService.setLogLevel(CloudPushService.LOG_ERROR)
                 }
-
                 "info" -> {
                     pushService.setLogLevel(CloudPushService.LOG_INFO)
                 }
-
                 "debug" -> {
                     pushService.setLogLevel(CloudPushService.LOG_DEBUG)
                 }
@@ -138,194 +134,227 @@ class ExpoAliyunPushModule : Module() {
 
         AsyncFunction("bindAccount") { account: String, promise: Promise ->
             val pushService = PushServiceFactory.getCloudPushService()
-            pushService.bindAccount(account, object : CommonCallback {
-                override fun onSuccess(p0: String?) {
-                    promise.resolve(p0)
-                }
+            pushService.bindAccount(
+                    account,
+                    object : CommonCallback {
+                        override fun onSuccess(p0: String?) {
+                            promise.resolve(p0)
+                        }
 
-                override fun onFailed(p0: String?, p1: String?) {
-                    if (p0 != null) {
-                        promise.reject(p0, p1, null)
+                        override fun onFailed(p0: String?, p1: String?) {
+                            if (p0 != null) {
+                                promise.reject(p0, p1, null)
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
 
         AsyncFunction("unbindAccount") { promise: Promise ->
             val pushService = PushServiceFactory.getCloudPushService()
-            pushService.unbindAccount(object : CommonCallback {
-                override fun onSuccess(p0: String?) {
-                    promise.resolve(p0)
-                }
+            pushService.unbindAccount(
+                    object : CommonCallback {
+                        override fun onSuccess(p0: String?) {
+                            promise.resolve(p0)
+                        }
 
-                override fun onFailed(p0: String?, p1: String?) {
-                    if (p0 != null) {
-                        promise.reject(p0, p1, null)
+                        override fun onFailed(p0: String?, p1: String?) {
+                            if (p0 != null) {
+                                promise.reject(p0, p1, null)
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
 
         AsyncFunction("bindPhoneNumber") { phone: String, promise: Promise ->
             val pushService = PushServiceFactory.getCloudPushService()
-            pushService.bindPhoneNumber(phone, object : CommonCallback {
-                override fun onSuccess(p0: String?) {
-                    promise.resolve(p0)
-                }
+            pushService.bindPhoneNumber(
+                    phone,
+                    object : CommonCallback {
+                        override fun onSuccess(p0: String?) {
+                            promise.resolve(p0)
+                        }
 
-                override fun onFailed(p0: String?, p1: String?) {
-                    if (p0 != null) {
-                        promise.reject(p0, p1, null)
+                        override fun onFailed(p0: String?, p1: String?) {
+                            if (p0 != null) {
+                                promise.reject(p0, p1, null)
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
 
         AsyncFunction("unbindPhoneNumber") { promise: Promise ->
             val pushService = PushServiceFactory.getCloudPushService()
-            pushService.unbindPhoneNumber(object : CommonCallback {
-                override fun onSuccess(p0: String?) {
-                    promise.resolve(p0)
-                }
+            pushService.unbindPhoneNumber(
+                    object : CommonCallback {
+                        override fun onSuccess(p0: String?) {
+                            promise.resolve(p0)
+                        }
 
-                override fun onFailed(p0: String?, p1: String?) {
-                    if (p0 != null) {
-                        promise.reject(p0, p1, null)
+                        override fun onFailed(p0: String?, p1: String?) {
+                            if (p0 != null) {
+                                promise.reject(p0, p1, null)
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
 
-        AsyncFunction("bindTag") { target: String, tags: Array<String>, alias: String?, promise: Promise ->
+        AsyncFunction("bindTag") {
+                target: String,
+                tags: Array<String>,
+                alias: String?,
+                promise: Promise ->
             val pushService = PushServiceFactory.getCloudPushService()
-            var targetInt = CloudPushService.DEVICE_TARGET;
+            var targetInt = CloudPushService.DEVICE_TARGET
             when (target) {
                 "device" -> {
-                    targetInt = CloudPushService.DEVICE_TARGET;
+                    targetInt = CloudPushService.DEVICE_TARGET
                 }
-
                 "account" -> {
-                    targetInt = CloudPushService.ACCOUNT_TARGET;
+                    targetInt = CloudPushService.ACCOUNT_TARGET
                 }
-
                 "alias" -> {
-                    targetInt = CloudPushService.ALIAS_TARGET;
+                    targetInt = CloudPushService.ALIAS_TARGET
                 }
             }
-            pushService.bindTag(targetInt, tags, alias, object : CommonCallback {
-                override fun onSuccess(p0: String?) {
-                    promise.resolve(p0)
-                }
+            pushService.bindTag(
+                    targetInt,
+                    tags,
+                    alias,
+                    object : CommonCallback {
+                        override fun onSuccess(p0: String?) {
+                            promise.resolve(p0)
+                        }
 
-                override fun onFailed(p0: String?, p1: String?) {
-                    if (p0 != null) {
-                        promise.reject(p0, p1, null)
+                        override fun onFailed(p0: String?, p1: String?) {
+                            if (p0 != null) {
+                                promise.reject(p0, p1, null)
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
 
-        AsyncFunction("unbindTag") { target: String, tags: Array<String>, alias: String?, promise: Promise ->
+        AsyncFunction("unbindTag") {
+                target: String,
+                tags: Array<String>,
+                alias: String?,
+                promise: Promise ->
             val pushService = PushServiceFactory.getCloudPushService()
-            var targetInt = CloudPushService.DEVICE_TARGET;
+            var targetInt = CloudPushService.DEVICE_TARGET
             when (target) {
                 "device" -> {
-                    targetInt = CloudPushService.DEVICE_TARGET;
+                    targetInt = CloudPushService.DEVICE_TARGET
                 }
-
                 "account" -> {
-                    targetInt = CloudPushService.ACCOUNT_TARGET;
+                    targetInt = CloudPushService.ACCOUNT_TARGET
                 }
-
                 "alias" -> {
-                    targetInt = CloudPushService.ALIAS_TARGET;
+                    targetInt = CloudPushService.ALIAS_TARGET
                 }
             }
-            pushService.unbindTag(targetInt, tags, alias, object : CommonCallback {
-                override fun onSuccess(p0: String?) {
-                    promise.resolve(p0)
-                }
+            pushService.unbindTag(
+                    targetInt,
+                    tags,
+                    alias,
+                    object : CommonCallback {
+                        override fun onSuccess(p0: String?) {
+                            promise.resolve(p0)
+                        }
 
-                override fun onFailed(p0: String?, p1: String?) {
-                    if (p0 != null) {
-                        promise.reject(p0, p1, null)
+                        override fun onFailed(p0: String?, p1: String?) {
+                            if (p0 != null) {
+                                promise.reject(p0, p1, null)
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
 
         AsyncFunction("listTags") { target: String, promise: Promise ->
             val pushService = PushServiceFactory.getCloudPushService()
-            var targetInt = CloudPushService.DEVICE_TARGET;
+            var targetInt = CloudPushService.DEVICE_TARGET
             when (target) {
                 "device" -> {
-                    targetInt = CloudPushService.DEVICE_TARGET;
+                    targetInt = CloudPushService.DEVICE_TARGET
                 }
-
                 "account" -> {
-                    targetInt = CloudPushService.ACCOUNT_TARGET;
+                    targetInt = CloudPushService.ACCOUNT_TARGET
                 }
-
                 "alias" -> {
-                    targetInt = CloudPushService.ALIAS_TARGET;
+                    targetInt = CloudPushService.ALIAS_TARGET
                 }
             }
-            pushService.listTags(targetInt, object : CommonCallback {
-                override fun onSuccess(p0: String?) {
-                    promise.resolve(p0)
-                }
+            pushService.listTags(
+                    targetInt,
+                    object : CommonCallback {
+                        override fun onSuccess(p0: String?) {
+                            promise.resolve(p0)
+                        }
 
-                override fun onFailed(p0: String?, p1: String?) {
-                    if (p0 != null) {
-                        promise.reject(p0, p1, null)
+                        override fun onFailed(p0: String?, p1: String?) {
+                            if (p0 != null) {
+                                promise.reject(p0, p1, null)
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
 
         AsyncFunction("addAlias") { alias: String, promise: Promise ->
             val pushService = PushServiceFactory.getCloudPushService()
-            pushService.addAlias(alias, object : CommonCallback {
-                override fun onSuccess(p0: String?) {
-                    promise.resolve(p0)
-                }
+            pushService.addAlias(
+                    alias,
+                    object : CommonCallback {
+                        override fun onSuccess(p0: String?) {
+                            promise.resolve(p0)
+                        }
 
-                override fun onFailed(p0: String?, p1: String?) {
-                    if (p0 != null) {
-                        promise.reject(p0, p1, null)
+                        override fun onFailed(p0: String?, p1: String?) {
+                            if (p0 != null) {
+                                promise.reject(p0, p1, null)
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
 
         AsyncFunction("removeAlias") { alias: String, promise: Promise ->
             val pushService = PushServiceFactory.getCloudPushService()
-            pushService.removeAlias(alias, object : CommonCallback {
-                override fun onSuccess(p0: String?) {
-                    promise.resolve(p0)
-                }
+            pushService.removeAlias(
+                    alias,
+                    object : CommonCallback {
+                        override fun onSuccess(p0: String?) {
+                            promise.resolve(p0)
+                        }
 
-                override fun onFailed(p0: String?, p1: String?) {
-                    if (p0 != null) {
-                        promise.reject(p0, p1, null)
+                        override fun onFailed(p0: String?, p1: String?) {
+                            if (p0 != null) {
+                                promise.reject(p0, p1, null)
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
 
         AsyncFunction("listAlias") { promise: Promise ->
             val pushService = PushServiceFactory.getCloudPushService()
-            pushService.listAliases(object : CommonCallback {
-                override fun onSuccess(p0: String?) {
-                    promise.resolve(p0)
-                }
+            pushService.listAliases(
+                    object : CommonCallback {
+                        override fun onSuccess(p0: String?) {
+                            promise.resolve(p0)
+                        }
 
-                override fun onFailed(p0: String?, p1: String?) {
-                    if (p0 != null) {
-                        promise.reject(p0, p1, null)
+                        override fun onFailed(p0: String?, p1: String?) {
+                            if (p0 != null) {
+                                promise.reject(p0, p1, null)
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
 
         AsyncFunction("setBadgeNumber") { badge: Int, promise: Promise ->
@@ -335,51 +364,51 @@ class ExpoAliyunPushModule : Module() {
         }
 
         AsyncFunction("getDeviceId") { promise: Promise ->
-//            return@AsyncFunction PushServiceFactory.getCloudPushService().deviceId;
+            //            return@AsyncFunction PushServiceFactory.getCloudPushService().deviceId;
             promise.resolve(PushServiceFactory.getCloudPushService().deviceId)
         }
 
-        AsyncFunction("createAndroidNotificationChannel") { channelInfo: ExpoAliyunPushChannelObject, promise: Promise ->
+        AsyncFunction("createAndroidNotificationChannel") {
+                channelInfo: ExpoAliyunPushChannelObject,
+                promise: Promise ->
             val application = appContext.reactContext?.applicationContext as android.app.Application
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val notificationManager =
-                    application.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                var importanceIntValue = NotificationManager.IMPORTANCE_DEFAULT;
+                        application.getSystemService(Context.NOTIFICATION_SERVICE) as
+                                NotificationManager
+                var importanceIntValue = NotificationManager.IMPORTANCE_DEFAULT
                 // TODO: when报错因为Record定义的时候写的是常量，不影响使用
                 when (channelInfo.importance) {
                     "none" -> {
                         importanceIntValue = NotificationManager.IMPORTANCE_NONE
                     }
-
                     "min" -> {
                         importanceIntValue = NotificationManager.IMPORTANCE_MIN
                     }
-
                     "low" -> {
                         importanceIntValue = NotificationManager.IMPORTANCE_LOW
                     }
-
                     "default" -> {
                         importanceIntValue = NotificationManager.IMPORTANCE_DEFAULT
                     }
-
                     "high" -> {
                         importanceIntValue = NotificationManager.IMPORTANCE_HIGH
                     }
-
                     "max" -> {
                         importanceIntValue = NotificationManager.IMPORTANCE_MAX
                     }
                 }
                 val channel =
-                    NotificationChannel(channelInfo.id, channelInfo.name, importanceIntValue);
+                        NotificationChannel(channelInfo.id, channelInfo.name, importanceIntValue)
                 if (channelInfo.group != null) {
                     channel.group = channelInfo.group
                 }
                 if (channelInfo.description != null) {
                     channel.description = channelInfo.description
                 }
-                if (channelInfo.allowBubbles == true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (channelInfo.allowBubbles == true &&
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                ) {
                     channel.setAllowBubbles(true)
                 }
                 if (channelInfo.enableLights == true) {
@@ -398,28 +427,31 @@ class ExpoAliyunPushModule : Module() {
                     channel.vibrationPattern = channelInfo.vibrationPattern.toLongArray()
                 }
                 if (!channelInfo.soundPath.isNullOrBlank()) {
-                    val soundUri = NotificationChannelSoundHelper.resolveSoundUri(
-                        application,
-                        channelInfo.soundPath,
-                    )
+                    val soundUri =
+                            NotificationChannelSoundHelper.resolveSoundUri(
+                                    application,
+                                    channelInfo.soundPath,
+                            )
                     if (soundUri != null) {
-                        val soundBuilder = AudioAttributes.Builder()
-                            .setContentType(
-                                channelInfo.soundContentType
-                                    ?: AudioAttributes.CONTENT_TYPE_SONIFICATION,
-                            )
-                            .setUsage(
-                                channelInfo.soundUsage
-                                    ?: AudioAttributes.USAGE_NOTIFICATION,
-                            )
+                        val soundBuilder =
+                                AudioAttributes.Builder()
+                                        .setContentType(
+                                                channelInfo.soundContentType
+                                                        ?: AudioAttributes
+                                                                .CONTENT_TYPE_SONIFICATION,
+                                        )
+                                        .setUsage(
+                                                channelInfo.soundUsage
+                                                        ?: AudioAttributes.USAGE_NOTIFICATION,
+                                        )
                         if (channelInfo.soundFlag != null) {
                             soundBuilder.setFlags(channelInfo.soundFlag)
                         }
                         channel.setSound(soundUri, soundBuilder.build())
                     } else {
                         Log.w(
-                            "ExpoAliyunPush",
-                            "Could not resolve notification sound: ${channelInfo.soundPath}",
+                                "ExpoAliyunPush",
+                                "Could not resolve notification sound: ${channelInfo.soundPath}",
                         )
                     }
                 }
@@ -427,9 +459,9 @@ class ExpoAliyunPushModule : Module() {
                 promise.resolve()
             } else {
                 promise.reject(
-                    "-1",
-                    "Android version is below Android O which is not support create channel",
-                    null
+                        "-1",
+                        "Android version is below Android O which is not support create channel",
+                        null
                 )
             }
         }
@@ -439,22 +471,21 @@ class ExpoAliyunPushModule : Module() {
         }
 
         AsyncFunction("getNotificationPermissionStatus") {
-
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 return@AsyncFunction "granted"
             }
 
             val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             if (notificationManager.areNotificationsEnabled()) {
                 return@AsyncFunction "granted"
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (PermissionChecker.checkSelfPermission(
-                        context,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    ) == PermissionChecker.PERMISSION_GRANTED
+                                context,
+                                Manifest.permission.POST_NOTIFICATIONS
+                        ) == PermissionChecker.PERMISSION_GRANTED
                 ) {
                     return@AsyncFunction "granted"
                 } else {
@@ -464,7 +495,6 @@ class ExpoAliyunPushModule : Module() {
                 return@AsyncFunction "denied"
             }
         }
-
 
         AsyncFunction("jumpToNotificationSettings") {
             val intent = Intent()
