@@ -99,6 +99,7 @@ export default {
             extraMavenRepos: [
               "https://maven.aliyun.com/nexus/content/repositories/releases/",
               "https://developer.huawei.com/repo/",
+              "https://developer.hihonor.com/repo/",
             ],
           },
         },
