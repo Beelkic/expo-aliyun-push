@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.5.0 - 2025-06-16
+
+- 新增荣耀的 MavenRepo #3 by [@Beelkic](https://github.com/Beelkic)
+
 ## 0.2.0 — 2025-06-13
 
 ### 🎉 New features
