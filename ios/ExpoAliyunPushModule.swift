@@ -105,7 +105,18 @@ public class ExpoAliyunPushModule: Module {
       }
       
       AsyncFunction("setAliyunLogLevel") { (logLevel: String) in
-          return true
+          switch logLevel {
+          case "off":
+              CloudPushSDK.setLogLevel(.off)
+          case "error":
+              CloudPushSDK.setLogLevel(.error)
+          case "info":
+              CloudPushSDK.setLogLevel(.info)
+          case "debug":
+              CloudPushSDK.setLogLevel(.debug)
+          default:
+              CloudPushSDK.setLogLevel(.error)
+          }
       }
       
       AsyncFunction("bindAccount") { (account: String, promise: Promise) in
