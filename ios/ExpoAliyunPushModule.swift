@@ -105,17 +105,15 @@ public class ExpoAliyunPushModule: Module {
       }
       
       AsyncFunction("setAliyunLogLevel") { (logLevel: String) in
+          // iOS SDK 只支持开启/关闭调试日志，没有分级控制
+          // 当设置为 debug 或 info 时开启，其他情况关闭
           switch logLevel {
-          case "off":
-              CloudPushSDK.setLogLevel(.off)
-          case "error":
-              CloudPushSDK.setLogLevel(.error)
-          case "info":
-              CloudPushSDK.setLogLevel(.info)
-          case "debug":
-              CloudPushSDK.setLogLevel(.debug)
+          case "debug", "info":
+              CloudPushSDK.turnOnDebug()
           default:
-              CloudPushSDK.setLogLevel(.error)
+              // iOS SDK 没有提供关闭调试的方法，只能在初始化前不调用 turnOnDebug
+              // 这里无操作，因为默认就是关闭的
+              break
           }
       }
       
