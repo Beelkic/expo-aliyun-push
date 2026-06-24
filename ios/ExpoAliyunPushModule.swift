@@ -347,7 +347,7 @@ class ExpoAliyunPushModuleDelegateProxy: NSObject, UNUserNotificationCenterDeleg
                                                         "title": title,
                                                         "summary": body])
 
-        // 同时发送 onNotificationReceivedInApp 事件（保持向后兼容）
+        // 同时发送 onNotificationReceivedInApp 事件（保持向后兼容，但存疑，这个会与onNotification重复）
         ExpoAliyunPushModule.moduleInstance?.sendEvent("onNotificationReceivedInApp",
                                                        ["ext": userInfo,
                                                         "title": title,
