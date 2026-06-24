@@ -6,6 +6,25 @@ public class ExpoAliyunPushModule: Module {
     static weak var moduleInstance: ExpoAliyunPushModule?
     static var notificationOptions: UNNotificationPresentationOptions = [.sound]
     let proxy = ExpoAliyunPushModuleDelegateProxy()
+
+    // 从 userInfo 中提取通知的 title 和 body
+    static func extractNotificationContent(from userInfo: [AnyHashable: Any]) -> (title: String, body: String) {
+        var title = ""
+        var body = ""
+
+        if let aps = userInfo["aps"] as? [AnyHashable: Any] {
+            if let alert = aps["alert"] as? [AnyHashable: Any] {
+                // alert 是字典格式：{"title": "...", "body": "..."}
+                title = alert["title"] as? String ?? ""
+                body = alert["body"] as? String ?? ""
+            } else if let alertString = aps["alert"] as? String {
+                // alert 是字符串格式
+                body = alertString
+            }
+        }
+
+        return (title, body)
+    }
     
     
   // See https://docs.expo.dev/modules/module-api for more details about available components.
@@ -14,6 +33,13 @@ public class ExpoAliyunPushModule: Module {
     Name("ExpoAliyunPush")
       OnCreate {
           Self.moduleInstance = self
+      }
+
+      OnDestroy {
+          // 模块销毁时移除观察者，避免内存泄漏
+          NotificationCenter.default.removeObserver(self.proxy,
+                                                    name: NSNotification.Name("CCPDidReceiveMessageNotification"),
+                                                    object: nil)
       }
 
     // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
@@ -42,8 +68,10 @@ public class ExpoAliyunPushModule: Module {
                   }
               }
               let notificationCenter = UNUserNotificationCenter.current()
+              // 设置代理以处理通知回调（关键修复）
+              notificationCenter.delegate = self.proxy
               notificationCenter.getNotificationSettings { settings in
-                  
+
               }
               notificationCenter.requestAuthorization(options: [.alert, .badge, .sound,]) { granted, error in
                   if granted {
@@ -54,6 +82,11 @@ public class ExpoAliyunPushModule: Module {
                       // TODO: 用户没有授权推送权限？
                   }
               }
+              // 先移除旧的观察者（如果存在），避免重复注册
+              NotificationCenter.default.removeObserver(proxy,
+                                                        name: NSNotification.Name("CCPDidReceiveMessageNotification"),
+                                                        object: nil)
+              // 注册阿里云消息通知观察者
               NotificationCenter.default.addObserver(proxy,
                                                      selector: #selector(proxy.onReceiveAliyunMessage),
                                                      name: NSNotification.Name("CCPDidReceiveMessageNotification"),
@@ -130,7 +163,7 @@ public class ExpoAliyunPushModule: Module {
           }
       }
       
-      AsyncFunction("unbindPhoneNumber") { (target: String,
+      AsyncFunction("unbindTag") { (target: String,
                                             tags: [String],
                                             alias: String?,
                                             promise: Promise) in
@@ -287,7 +320,7 @@ public class ExpoAliyunPushModule: Module {
 
 
 class ExpoAliyunPushModuleDelegateProxy: NSObject, UNUserNotificationCenterDelegate {
-    
+
     @objc func onReceiveAliyunMessage(_ note: Notification) {
         if let message = note.object as? CCPSysMessage {
             if let title = String(data: message.title, encoding: .utf8),
@@ -300,13 +333,43 @@ class ExpoAliyunPushModuleDelegateProxy: NSObject, UNUserNotificationCenterDeleg
         }
     }
     
+    // 前台收到通知时调用
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        ExpoAliyunPushModule.moduleInstance?.sendEvent("onNotificationReceivedInApp", 
-                                                       ["ext": notification.request.content.userInfo,
-                                                                                       "title": notification.request.content.title,
-                                                                                       "summary": notification.request.content.body])
+        let userInfo = notification.request.content.userInfo
+        let title = notification.request.content.title
+        let body = notification.request.content.body
+
+        // 发送通用的 onNotification 事件（前台接收）
+        ExpoAliyunPushModule.moduleInstance?.sendEvent("onNotification",
+                                                       ["ext": userInfo,
+                                                        "title": title,
+                                                        "summary": body])
+
+        // 同时发送 onNotificationReceivedInApp 事件（保持向后兼容）
+        ExpoAliyunPushModule.moduleInstance?.sendEvent("onNotificationReceivedInApp",
+                                                       ["ext": userInfo,
+                                                        "title": title,
+                                                        "summary": body])
         completionHandler(ExpoAliyunPushModule.notificationOptions)
+    }
+
+    // 用户点击通知时调用
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        let title = response.notification.request.content.title
+        let body = response.notification.request.content.body
+
+        // 发送点击通知事件
+        CloudPushSDK.sendNotificationAck(userInfo)
+        ExpoAliyunPushModule.moduleInstance?.sendEvent("onNotificationOpened",
+                                                       ["ext": userInfo,
+                                                        "title": title,
+                                                        "summary": body])
+
+        completionHandler()
     }
 }

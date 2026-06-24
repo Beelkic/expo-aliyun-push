@@ -1,6 +1,6 @@
 import { registerWebModule, NativeModule } from 'expo';
 
-import { AliyunPushLogLevel, AliyunTagTarget, AndroidNotificationChannel, ExpoAliyunPushModuleEvents, IOSNotificationForegroundOptions } from './ExpoAliyunPush.types';
+import type { AliyunPushLogLevel, AliyunTagTarget, AndroidNotificationChannel, ExpoAliyunPushModuleEvents, IOSNotificationForegroundOptions } from './ExpoAliyunPush.types';
 
 class ExpoAliyunPushModule extends NativeModule<ExpoAliyunPushModuleEvents> {
   /**
@@ -187,4 +187,4 @@ class ExpoAliyunPushModule extends NativeModule<ExpoAliyunPushModuleEvents> {
   }
 }
 
-export default registerWebModule(ExpoAliyunPushModule);
+export default registerWebModule(ExpoAliyunPushModule, 'ExpoAliyunPush');
